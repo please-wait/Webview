@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style media="screen">
+      svg { border: 1px solid #dedede; }
+
+      .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+
+      /*.area { fill: #4ca3bd; }*/
+      .prediction { fill: rgb(255, 201, 90); }
+    </style>
+  </head>
+  <body>
+    <svg id="area"/>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="PI.js"></script>
+    <script type="text/javascript">
+    var data = [
+      { x: 0, y: 10, },
+      { x: 1, y: 15, },
+      { x: 2, y: 35, },
+      { x: 3, y: 20, },
+      { x: 4, y: 12, },
+      { x: 5, y: 23, },
+      { x: 6, y: 27, },
+      { x: 7, y: 16, },
+      { x: 8, y: 11, },
+      { x: 9, y: 18, },
+      { x: 10, y: 10, }
+    ];
+    var prediction = [
+      { x: 10, y: 10, },
+      { x: 11, y: 5, },
+      { x: 12, y: 35, },
+      { x: 13, y: 20, },
+      { x: 14, y: 12, },
+      { x: 15, y: 23, },
+      { x: 16, y: 27, },
+      { x: 17, y: 16, },
+      { x: 18, y: 11, },
+      { x: 19, y: 24, },
+    ];
+
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+      width = 575 - margin.left - margin.right,
+      height = 350 - margin.top - margin.bottom;
+
+    var x = d3.scale.linear()
+      .domain([d3.min(data, function(d) { return d.x; }), d3.max(prediction, function(d) { return d.x; })])
+      .range([0, width]);
+
+    var y = d3.scale.linear()
+      .domain([0, d3.max(prediction, function(d) { return d.y; })])
+      .range([height, 0]);
+
+    var area = d3.svg.area()
+      .interpolate("basis") //smoothing
+      .x(function(d) { return x(d.x); })
+      .y0(height)
+      .y1(function(d) { return y(d.y); });
+
+    var line = d3.svg.line()
+      .interpolate("basis") //smoothing
+      .x(function(d) { return x(d.x); })
+      .y(function(d) { return y(d.y); });
+
+
+
+    var svg = d3.select("svg#area")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    svg.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("d", area)
+      .attr('fill', 'url(#gradient)');
+
+    svg.append("path")
+      .datum(prediction)
+      .attr("class", "prediction")
+      .attr("d", area);
+
+    svg.append("path")
+      .datum(prediction)
+      .attr("class", "prediction")
+      .attr("d", line)
+      .style("stroke", "rgb(228, 36, 36)")
+      .style("fill", "none")
+      .style("stroke-width", "2px")
+      .style("stroke-dasharray", "6,6");
+
+
+
+    // GRADIENT
+
+    var gradient = svg.append("svg:defs")
+    .append("svg:linearGradient")
+    .attr("id", "gradient")
+    .attr("x1", "100%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "100%")
+    .attr("spreadMethod", "pad");
+    // Define the gradient colors
+    gradient.append("svg:stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#9bdbf1")
+        .attr("stop-opacity", 1);
+
+    gradient.append("svg:stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#d5f4ff")
+        .attr("stop-opacity", 1);
+
+    // AXES
+
+      var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+        .scale(y)
+        .orient("left");
+
+      svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+      svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+
+      //INK
+      purpleInk.drop("svg#area","circle",x(2)+margin.left,y(30)+margin.bottom); // XXX: path smoothing changes the shape
+      setTimeout(() => {purpleInk.drop("svg#area","circle",x(5.7)+margin.left,y(25)+margin.bottom)},2000);
+    </script>
+  </body>
+</html>
